@@ -26,7 +26,7 @@
     "es",
     "lib"
   ],
-  "main": "./lib/index.js",
+  "main": "./index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/fanatid/ethereumjs-devp2p.git"
