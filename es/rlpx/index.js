@@ -10,6 +10,7 @@ const Peer = require('./peer')
 
 const debug = createDebugLogger('devp2p:rlpx')
 
+const DEFAULT_CACHE_OPTS = { max: 25000 }
 const DEFAULT_CLIENT_ID = `EthereumJS/${pVersion}`
 const DEFAULT_CREATE_SERVER = net.createServer
 const DEFAULT_CREATE_SOCKET = () => new net.Socket()
@@ -26,7 +27,7 @@ class RLPx extends EventEmitter {
     // options
     this._createServer = options.createServer || DEFAULT_CREATE_SERVER
     this._createSocket = options.createSocket || DEFAULT_CREATE_SOCKET
-    this._timeout = options.timeout || DEAFULT_TIMEOUT
+    this._timeout = options.timeout || DEFAULT_TIMEOUT
     this._maxPeers = options.maxPeers || DEFAULT_MAX_PEERS
     this._clientId = Buffer.from(options.clientId || DEFAULT_CLIENT_ID)
     this._capabilities = options.capabilities
@@ -34,14 +35,18 @@ class RLPx extends EventEmitter {
 
     // DPT
     this._dpt = options.dpt || null
+
     if (this._dpt !== null) {
       this._dpt.on('peer:new', (peer) => {
         if (this._peersLRU.has(peer.id.toString('hex'))) return
+
         this._peersLRU.set(peer.id.toString('hex'), true)
 
         if (this._getOpenSlots() > 0) return this._connectToPeer(peer)
+
         this._peersQueue.push({ peer: peer, ts: 0 }) // save to queue
       })
+
       this._dpt.on('peer:removed', (peer) => {
         // remove from queue
         this._peersQueue = this._peersQueue.filter((item) => !item.peer.id.equals(peer.id))
@@ -57,7 +62,7 @@ class RLPx extends EventEmitter {
 
     this._peers = new Map()
     this._peersQueue = []
-    this._peersLRU = new LRUCache({ max: 25000 })
+    this._peersLRU = new LRUCache(DEFAULT_CACHE_OPTS)
     this._refillIntervalId = setInterval(() => this._refillConnections(), ms('10s'))
   }
 
