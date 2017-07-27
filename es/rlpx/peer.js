@@ -1,9 +1,9 @@
 const { EventEmitter } = require('events')
+const { intToBuffer, bufferToInt } = require('ethereumjs-util')
 const rlp = require('rlp-encoding')
 const BufferList = require('bl')
 const ms = require('ms')
 const createDebugLogger = require('debug')
-const { int2buffer, buffer2int } = require('../util')
 const ECIES = require('./ecies')
 
 const debug = createDebugLogger('devp2p:rlpx:peer')
@@ -145,12 +145,12 @@ class Peer extends EventEmitter {
     switch (code) {
       case PREFIXES.HELLO:
         this._hello = {
-          protocolVersion: buffer2int(payload[0]),
+          protocolVersion: bufferToInt(payload[0]),
           clientId: payload[1].toString(),
           capabilities: payload[2].map((item) => {
-            return { name: item[0].toString(), version: buffer2int(item[1]) }
+            return { name: item[0].toString(), version: bufferToInt(item[1]) }
           }),
-          port: buffer2int(payload[3]),
+          port: bufferToInt(payload[3]),
           id: payload[4]
         }
 
@@ -236,10 +236,10 @@ class Peer extends EventEmitter {
 
   _sendHello () {
     const payload = [
-      int2buffer(BASE_PROTOCOL_VERSION),
+      intToBuffer(BASE_PROTOCOL_VERSION),
       this._clientId,
-      this._capabilities.map((obj) => [ Buffer.from(obj.name), int2buffer(obj.version) ]),
-      this._port === null ? Buffer.allocUnsafe(0) : int2buffer(this._port),
+      this._capabilities.map((obj) => [ Buffer.from(obj.name), intToBuffer(obj.version) ]),
+      this._port === null ? Buffer.allocUnsafe(0) : intToBuffer(this._port),
       this._id
     ]
 

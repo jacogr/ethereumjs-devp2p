@@ -1,4 +1,5 @@
 const crypto = require('crypto')
+const { intToBuffer, bufferToInt } = require('ethereumjs-util');
 const secp256k1 = require('secp256k1')
 const rlp = require('rlp-encoding')
 const util = require('../util')
@@ -181,7 +182,7 @@ class ECIES {
   }
 
   createHeader (size) {
-    size = util.zfill(util.int2buffer(size), 3)
+    size = util.zfill(intToBuffer(size), 3)
     let header = Buffer.concat([ size, rlp.encode([ 0, 0 ]) ]) // TODO: the rlp will contain something else someday
     header = util.zfill(header, 16, false)
     header = this._egressAes.update(header)
@@ -202,7 +203,7 @@ class ECIES {
     util.assertEq(_mac, mac, 'Invalid MAC')
 
     header = this._ingressAes.update(header)
-    this._bodySize = util.buffer2int(header.slice(0, 3))
+    this._bodySize = bufferToInt(header.slice(0, 3))
     return this._bodySize
   }
 

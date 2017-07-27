@@ -24,20 +24,6 @@ function id2pk (id) {
   return Buffer.concat([ Buffer.from([ 0x04 ]), id ])
 }
 
-function int2buffer (v) {
-  let hex = v.toString(16)
-  if (hex.length % 2 === 1) hex = '0' + hex
-  return Buffer.from(hex, 'hex')
-}
-
-function buffer2int (buffer) {
-  if (buffer.length === 0) return NaN
-
-  let n = 0
-  for (let i = 0; i < buffer.length; ++i) n = n * 256 + buffer[i]
-  return n
-}
-
 function zfill (buffer, size, leftpad) {
   if (buffer.length >= size) return buffer
   if (leftpad === undefined) leftpad = true
@@ -80,8 +66,6 @@ module.exports = {
   genPrivateKey,
   pk2id,
   id2pk,
-  int2buffer,
-  buffer2int,
   zfill,
   xor,
   assertEq,

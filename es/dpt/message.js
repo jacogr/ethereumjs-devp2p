@@ -1,7 +1,8 @@
 const ip = require('ip')
 const rlp = require('rlp-encoding')
 const secp256k1 = require('secp256k1')
-const { keccak256, int2buffer, buffer2int, assertEq } = require('../util')
+const { bufferToInt, intToBuffer } = require('ethereumjs-util');
+const { keccak256, assertEq } = require('../util')
 
 function getTimestamp () {
   return (Date.now() / 1000) | 0
@@ -46,7 +47,7 @@ const port = {
   decode: function (buffer) {
     if (buffer.length === 0) return null
     // if (buffer.length !== 2) throw new RangeError(`Invalid port buffer: ${buffer.toString('hex')}`)
-    return buffer2int(buffer)
+    return bufferToInt(buffer)
   }
 }
 
@@ -70,7 +71,7 @@ const endpoint = {
 const ping = {
   encode: function (obj) {
     return [
-      int2buffer(obj.version),
+      intToBuffer(obj.version),
       endpoint.encode(obj.from),
       endpoint.encode(obj.to),
       timestamp.encode(obj.timestamp)
@@ -78,7 +79,7 @@ const ping = {
   },
   decode: function (payload) {
     return {
-      version: buffer2int(payload[0]),
+      version: bufferToInt(payload[0]),
       from: endpoint.decode(payload[1]),
       to: endpoint.decode(payload[2]),
       timestamp: timestamp.decode(payload[3])

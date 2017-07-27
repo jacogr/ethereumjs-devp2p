@@ -1,7 +1,8 @@
 const { EventEmitter } = require('events')
+const { intToBuffer } = require('ethereumjs-util');
 const rlp = require('rlp-encoding')
 const ms = require('ms')
-const { int2buffer, assertEq } = require('../util')
+const { assertEq } = require('../util')
 const Peer = require('../rlpx/peer')
 
 const MESSAGE_CODES = {
@@ -93,8 +94,8 @@ class ETH extends EventEmitter {
   sendStatus (status) {
     if (this._status !== null) return
     this._status = [
-      int2buffer(this._version),
-      int2buffer(status.networkId),
+      intToBuffer(this._version),
+      intToBuffer(status.networkId),
       status.td,
       status.bestHash,
       status.genesisHash
