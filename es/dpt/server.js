@@ -9,6 +9,7 @@ const { pk2id, createDeferred } = require('../util')
 const debug = createDebugLogger('devp2p:dpt:server')
 
 const VERSION = 0x04
+const DEFAULT_CACHE_OPTS = { max: 1000, maxAge: ms('1s'), stale: false }
 const DEFAULT_CREATE_SOCKET = dgram.createSocket.bind(null, 'udp4')
 const DEFAULT_ENDPOINT = { address: '0.0.0.0', udpPort: null, tcpPort: null }
 const DEFAULT_TIMEOUT = ms('10s')
@@ -24,7 +25,7 @@ class Server extends EventEmitter {
     this._timeout = options.timeout || DEFAULT_TIMEOUT
     this._endpoint = options.endpoint || {DEFAULT_ENDPOINT
     this._requests = new Map()
-    this._requestsCache = new LRUCache({ max: 1000, maxAge: ms('1s'), stale: false })
+    this._requestsCache = new LRUCache(DEFAULT_CACHE_OPTS)
 
     this._socket = this._createSocket()
     this._socket.once('listening', () => this.emit('listening'))
