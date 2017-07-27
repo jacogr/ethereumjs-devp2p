@@ -10,6 +10,12 @@ const Peer = require('./peer')
 
 const debug = createDebugLogger('devp2p:rlpx')
 
+const DEFAULT_CLIENT_ID = `EthereumJS/${pVersion}`
+const DEFAULT_CREATE_SERVER = net.createServer
+const DEFAULT_CREATE_SOCKET = () => new net.Socket()
+const DEFAULT_MAX_PEERS = 25
+const DEFAULT_TIMEOUT = ms('10s')
+
 class RLPx extends EventEmitter {
   constructor (privateKey, options) {
     super()
@@ -18,9 +24,11 @@ class RLPx extends EventEmitter {
     this._id = pk2id(secp256k1.publicKeyCreate(this._privateKey, false))
 
     // options
-    this._timeout = options.timeout || ms('10s')
-    this._maxPeers = options.maxPeers || 10
-    this._clientId = Buffer.from(options.clientId || `Ethereum Node.js/${pVersion}`)
+    this._createServer = options.createServer || DEFAULT_CREATE_SERVER
+    this._createSocket = options.createSocket || DEFAULT_CREATE_SOCKET
+    this._timeout = options.timeout || DEAFULT_TIMEOUT
+    this._maxPeers = options.maxPeers || DEFAULT_MAX_PEERS
+    this._clientId = Buffer.from(options.clientId || DEFAULT_CLIENT_ID)
     this._capabilities = options.capabilities
     this._listenPort = options.listenPort
 
@@ -41,7 +49,7 @@ class RLPx extends EventEmitter {
     }
 
     // internal
-    this._server = net.createServer()
+    this._server = this._createServer()
     this._server.once('listening', () => this.emit('listening'))
     this._server.once('close', () => this.emit('close'))
     this._server.on('error', (err) => this.emit('error', err))
@@ -84,7 +92,7 @@ class RLPx extends EventEmitter {
     debug(`connect to ${peer.address}:${peer.port} (id: ${peerKey})`)
     const deferred = createDeferred()
 
-    const socket = new net.Socket()
+    const socket = this._createSocket()
     this._peers.set(peerKey, socket)
     socket.once('close', () => {
       this._peers.delete(peerKey)
