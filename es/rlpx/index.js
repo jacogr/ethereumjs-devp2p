@@ -12,7 +12,7 @@ const debug = createDebugLogger('devp2p:rlpx')
 
 const DEFAULT_CACHE_OPTS = { max: 25000 }
 const DEFAULT_CLIENT_ID = `EthereumJS/${pVersion}`
-const DEFAULT_CREATE_SERVER = net.createServer
+const DEFAULT_CREATE_SERVER = () => net.createServer()
 const DEFAULT_CREATE_SOCKET = () => new net.Socket()
 const DEFAULT_MAX_PEERS = 25
 const DEFAULT_TIMEOUT = ms('10s')
